@@ -1,7 +1,8 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { VTKRenderView } from "./Component/VTKRenderView";
+import VTKRenderView from "./Component/VTKRenderView";
+import PointList from './Component/PointList';
 import { Container, Row, Col } from 'react-bootstrap';
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
       <Container fluid >
         <Row>
           <Col xs="2">
-            <h1>Tmp</h1>
+            <PointList />
           </Col>
           <Col xs="10">
             <VTKRenderView />

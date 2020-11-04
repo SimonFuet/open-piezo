@@ -12,12 +12,27 @@ import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindo
 import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
 import ConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource';
+import { RootState } from '../store';
+import { connect, ConnectedProps } from 'react-redux';
 
+const mapStateToProps = (state: RootState) => ({
+    vtk: state.vtk
+})
 
+const mapDispatchToProps = {
 
-export class VTKRenderView extends React.Component {
+}
+
+const connector = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)
+
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+class VTKRenderView extends React.Component<PropsFromRedux, {}> {
     openglRenderWindow: any;
-    constructor(props: any) {
+    constructor(props: PropsFromRedux) {
         super(props);
         this.openglRenderWindow = null;
     }
@@ -31,34 +46,21 @@ export class VTKRenderView extends React.Component {
         // Simple pipeline ConeSource --> Mapper --> Actor
         // ----------------------------------------------------------------------------
 
+        const dataPoints = this.props.vtk.points;
+
         const polydata = PolyData.newInstance();
         const vertexArray = [];
-        vertexArray.push(0, 0, 0);
-        vertexArray.push(1, 0, 0);
-        vertexArray.push(0, 1, 0);
-        vertexArray.push(1, 1, 0);
-        vertexArray.push(2, 0, 0);
-
         const cellArray = [];
-        cellArray.push(5);
-        cellArray.push(0);
-        cellArray.push(1);
-        cellArray.push(2);
-        cellArray.push(3);
-        cellArray.push(4);
+        cellArray.push(dataPoints.length);
+
+        for (let i = 0; i < dataPoints.length; i++) {
+            const curPoint = dataPoints[i];
+            vertexArray.push(curPoint.x, curPoint.y, 0);
+            cellArray.push(i);
+        }
+
         polydata.getPoints().setData(Float32Array.from(vertexArray), 3);
         polydata.getLines().setData(Uint16Array.from(cellArray));
-
-        const points = Points.newInstance();
-        points.setNumberOfPoints(5);
-        points.setPoint(0, 0, 0, 0);
-        points.setPoint(1, 1, 0, 0);
-        points.setPoint(2, 0, 1, 0);
-        points.setPoint(3, 1, 1, 0);
-        points.setPoint(4, 2, 0, 0);
-
-        const pointset = PolyData.newInstance();
-        pointset.setPoints(points);
 
         const coneSource = ConeSource.newInstance({ height: 1.0 });
 
@@ -144,3 +146,4 @@ export class VTKRenderView extends React.Component {
     }
 }
 
+export default connector(VTKRenderView);

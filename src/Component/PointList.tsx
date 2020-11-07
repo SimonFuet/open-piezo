@@ -6,6 +6,7 @@ import { VtkPoint } from '../store/vtk/types';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import Point from './Point';
+import AddPoint from './AddPoint';
 
 const mapStateToProps = (state: RootState) => ({
     points: state.vtk.points
@@ -36,9 +37,7 @@ const PointList = (props: PropsFromRedux) => {
     return (
         <div>
             {pointsElts}
-            <button onClick={() => props.addPoint({ x: props.points.length, y: 0, value: 20 })}>
-                Add point
-            </button>
+            <AddPoint addPoint={point => props.addPoint(point)} />
         </div>
     )
 }

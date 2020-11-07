@@ -14,6 +14,7 @@ import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/
 import ConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource';
 import { RootState } from '../store';
 import { connect, ConnectedProps } from 'react-redux';
+import { VtkState } from '../store/vtk/types';
 
 const mapStateToProps = (state: RootState) => ({
     vtk: state.vtk
@@ -30,17 +31,30 @@ const connector = connect(
 
 type PropsFromRedux = ConnectedProps<typeof connector>
 
+interface State {
+    vtk: VtkState
+}
+
 class VTKRenderView extends React.Component<PropsFromRedux, {}> {
     openglRenderWindow: any;
+    polydata: any;
+    renderWindow: any;
+    state: State;
     constructor(props: PropsFromRedux) {
         super(props);
         this.openglRenderWindow = null;
+        this.polydata = null;
+        this.renderWindow = null;
+
+        this.state = {
+            vtk: { points: [] }
+        }
     }
 
     componentDidMount() {
-        const renderWindow = vtkRenderWindow.newInstance();
+        this.renderWindow = vtkRenderWindow.newInstance();
         const renderer = vtkRenderer.newInstance({ background: [0.2, 0.3, 0.4] });
-        renderWindow.addRenderer(renderer);
+        this.renderWindow.addRenderer(renderer);
 
         // ----------------------------------------------------------------------------
         // Simple pipeline ConeSource --> Mapper --> Actor
@@ -48,7 +62,7 @@ class VTKRenderView extends React.Component<PropsFromRedux, {}> {
 
         const dataPoints = this.props.vtk.points;
 
-        const polydata = PolyData.newInstance();
+        this.polydata = PolyData.newInstance();
         const vertexArray = [];
         const cellArray = [];
         cellArray.push(dataPoints.length);
@@ -59,15 +73,11 @@ class VTKRenderView extends React.Component<PropsFromRedux, {}> {
             cellArray.push(i);
         }
 
-        polydata.getPoints().setData(Float32Array.from(vertexArray), 3);
-        polydata.getLines().setData(Uint16Array.from(cellArray));
-
-        const coneSource = ConeSource.newInstance({ height: 1.0 });
+        this.polydata.getPoints().setData(Float32Array.from(vertexArray), 3);
+        this.polydata.getLines().setData(Uint16Array.from(cellArray));
 
         const mapper = vtkMapper.newInstance();
-        mapper.setInputData(polydata);
-        //mapper.setInputData(coneSource.getOutputData());
-        //mapper.setInputConnection(coneSource.getOutputPort());
+        mapper.setInputData(this.polydata);
 
         const actor = vtkActor.newInstance();
         //const actor = vtkActor2D.newInstance();
@@ -88,7 +98,7 @@ class VTKRenderView extends React.Component<PropsFromRedux, {}> {
 
         const openglRenderWindow = vtkOpenGLRenderWindow.newInstance();
         this.openglRenderWindow = openglRenderWindow;
-        renderWindow.addView(openglRenderWindow);
+        this.renderWindow.addView(openglRenderWindow);
 
         // ----------------------------------------------------------------------------
         // Create a div section to put this into
@@ -101,7 +111,7 @@ class VTKRenderView extends React.Component<PropsFromRedux, {}> {
         }
         openglRenderWindow.setContainer(container);
 
-        renderWindow.render();
+        this.renderWindow.render();
 
         // ----------------------------------------------------------------------------
         // Capture size of the container and set it to the renderWindow
@@ -135,6 +145,31 @@ class VTKRenderView extends React.Component<PropsFromRedux, {}> {
 
         interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
 
+    }
+
+    shouldComponentUpdate(nextProp: PropsFromRedux, nextState: {}) {
+        console.log("Should component update");
+        console.log(nextProp);
+        console.log(this.props.vtk);
+        if (JSON.stringify(nextProp.vtk) !== JSON.stringify(this.props.vtk)) {
+            console.log("Updating");
+            const dataPoints = nextProp.vtk.points;
+            const vertexArray = [];
+            const cellArray = [];
+            cellArray.push(dataPoints.length);
+
+            for (let i = 0; i < dataPoints.length; i++) {
+                const curPoint = dataPoints[i];
+                vertexArray.push(curPoint.x, curPoint.y, 0);
+                cellArray.push(i);
+            }
+
+            this.polydata.getPoints().setData(Float32Array.from(vertexArray), 3);
+            this.polydata.getLines().setData(Uint16Array.from(cellArray));
+            this.polydata.modified();
+            this.renderWindow.render();
+        }
+        return true;
     }
 
     render() {

@@ -1,11 +1,7 @@
 import { VtkState, ADD_POINT, DELETE_POINT, VtkActionTypes } from './types';
 
 const initialState: VtkState = {
-    points: [
-        { x: 0, y: 0, value: 10 },
-        { x: 1, y: 1, value: 10 },
-        { x: 2, y: 2, value: 10 }
-    ]
+    points: []
 }
 
 export function vtkDataReducer(state = initialState, action: VtkActionTypes): VtkState {

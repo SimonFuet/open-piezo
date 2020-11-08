@@ -7,6 +7,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import Point from './Point';
 import AddPoint from './AddPoint';
+import { ListGroup } from 'react-bootstrap';
 
 const mapStateToProps = (state: RootState) => ({
     points: state.vtk.points
@@ -26,17 +27,21 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 const PointList = (props: PropsFromRedux) => {
     const pointsElts = props.points.map((point, index) => (
-        <Point
-            point={point}
-            pointId={index}
-            edit={() => { }}
-            delete={(pointId) => props.deletePoint(pointId)}
-        />
+        <ListGroup.Item>
+            <Point
+                point={point}
+                pointId={index}
+                edit={() => { }}
+                delete={(pointId) => props.deletePoint(pointId)}
+            />
+        </ListGroup.Item>
     ))
 
     return (
         <div>
-            {pointsElts}
+            <ListGroup>
+                {pointsElts}
+            </ListGroup>
             <AddPoint addPoint={point => props.addPoint(point)} />
         </div>
     )

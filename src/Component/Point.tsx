@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button, Col, Row } from 'react-bootstrap';
 import { VtkPoint } from '../store/vtk/types';
 
 interface Props {
@@ -10,9 +11,14 @@ interface Props {
 
 const Point = ({ point, pointId, ...props }: Props) => (
     <div>
-        <p>{pointId}=({point.x},{point.y})({point.value}) </p>
-        <button>Edit</button>
-        <button onClick={() => props.delete(pointId)}>Delete</button>
+        <Row>
+            <Col>
+                <p>{pointId}=({point.x},{point.y})({point.value}) </p>
+            </Col>
+            <Col>
+                <Button onClick={() => props.delete(pointId)}>Delete</Button>
+            </Col>
+        </Row>
     </div>
 )
 

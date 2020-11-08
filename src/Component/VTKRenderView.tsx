@@ -56,10 +56,6 @@ class VTKRenderView extends React.Component<PropsFromRedux, {}> {
         const renderer = vtkRenderer.newInstance({ background: [0.2, 0.3, 0.4] });
         this.renderWindow.addRenderer(renderer);
 
-        // ----------------------------------------------------------------------------
-        // Simple pipeline ConeSource --> Mapper --> Actor
-        // ----------------------------------------------------------------------------
-
         const dataPoints = this.props.vtk.points;
 
         this.polydata = PolyData.newInstance();
